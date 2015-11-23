@@ -21,9 +21,10 @@ def process(data):
         data = data.drop(['Customers'], axis=1)
 
     # stuff to be dropped regardless of train or test data
-    data = data.drop(['Date', 'PromoInterval', 'Open'], axis=1)
+    data = data.drop(['PromoInterval', 'Open'], axis=1)
 
     data = data.fillna(0)
+    print data
 
     return data
 
@@ -47,7 +48,6 @@ train = process(train)
 print('training data processed')
 
 test = pd.merge(test, store, on='Store')
-test = test[test['Open'] != 0]
 test = process(test)
 print('testing data processed')
 train.to_csv('../train_processed.csv', delimiter=',')

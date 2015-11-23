@@ -7,11 +7,13 @@ import pandas as pd
 import xgboost as xgb
 from rmspe import rmspe
 from rmspe import rmspe_xg
+from datetime import datetime
 
-data = pd.read_csv('../train_processed.csv',delimiter=',')
+data = pd.read_csv('../train_processed.csv',delimiter=',', parse_dates=[3], index_col=0)
 #select features
 features = ['Store',
             'DayOfWeek',
+            #'Date'
             #'Sales',
             'Promo',
             'StateHoliday',
@@ -27,6 +29,13 @@ features = ['Store',
             'year',
             'month',
             'day']
+
+# feature engineering
+compDataAvailable = (data.CompetitionOpenSinceYear != 0) & (data.CompetitionOpenSinceMonth != 0)
+getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
+competitionOpenDeltaDays = data[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
+data['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
+data = data.fillna(-9999)
 
 targets = data['Sales'].values
 targets = np.reshape(targets, [targets.shape[0], 1])

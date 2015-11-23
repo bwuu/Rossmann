@@ -6,21 +6,24 @@ data = pd.read_csv('../train_processed.csv',delimiter=',')
 #select features
 features = ['Store',
             'DayOfWeek',
+            #'Date'
             #'Sales',
             'Promo',
-            'StateHoliday',
-            'SchoolHoliday',
+            #'StateHoliday',
+            #'SchoolHoliday',
             'StoreType',
             'Assortment',
             'CompetitionDistance',
             'CompetitionOpenSinceMonth',
             'CompetitionOpenSinceYear',
-            'Promo2',
+            #'Promo2',
             'Promo2SinceWeek',
             'Promo2SinceYear',
             'year',
             'month',
             'day']
+
+
 
 targets = data['Sales'].values
 targets = np.reshape(targets, [targets.shape[0], 1])
@@ -33,14 +36,14 @@ offset = int(data.shape[0] * 0.9)
 train = data[:offset, :]
 test = data[offset:, :]
 
-params= {'n_estimators':30, 'n_jobs':2, 'verbose':2, 'max_depth':30, 'max_features':0.6,}
+params= {'n_estimators':50, 'n_jobs':1, 'verbose':2, 'max_depth':30, 'max_features':0.6,}
 forest = RandomForestRegressor(**params)
 forest.fit(train[:, 1::], np.log1p(train[:, 0]))
 
-# WARNING: MAY DUMP A FEW GIGS OR MORE
-# from sklearn.externals import joblib
-# joblib.dump(forest, 'rf_001.model')
-# print 'wrote forest model to rf_001.model'
+#WARNING: MAY DUMP A FEW GIGS OR MORE
+#from sklearn.externals import joblib
+#joblib.dump(forest, '../saved_models/rf_001.model')
+#print 'wrote forest model to rf_001.model'
 
 out = np.expm1(forest.predict(test[:, 1::]))
 target = test[:, 0]

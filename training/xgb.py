@@ -28,7 +28,18 @@ features = ['Store',
             'Promo2SinceYear',
             'year',
             'month',
-            'day']
+            'day',
+            'JanPromo',
+            'FebPromo',
+            'MarPromo',
+            'AprPromo',
+            'MayPromo',
+            'JunPromo',
+            'JulPromo',
+            'SeptPromo',
+            'OctPromo',
+            'NovPromo',
+            'DecPromo']
 
 # feature engineering
 compDataAvailable = (data.CompetitionOpenSinceYear != 0) & (data.CompetitionOpenSinceMonth != 0)

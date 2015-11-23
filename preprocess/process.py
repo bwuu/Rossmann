@@ -39,7 +39,23 @@ types = {'CompetitionOpenSinceYear': np.dtype(int),
          'PromoInterval': np.dtype(str)}
 train = pd.read_csv("../train.csv", parse_dates=[2], dtype=types)
 test = pd.read_csv("../test.csv", parse_dates=[3], dtype=types)
-store = pd.read_csv("../store.csv")
+store = pd.read_csv("../store.csv", dtype={'PromoInterval': np.dtype(str)})
+
+# Parse PromoInterval
+store['PromoInterval'] = store['PromoInterval'].replace(np.nan, '', regex=True)
+store['PromoInterval'] = store['PromoInterval'].apply(lambda x: x.split(','))
+store['JanPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Jan' in x else 0)
+store['FebPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Feb' in x else 0)
+store['MarPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Mar' in x else 0)
+store['AprPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Apr' in x else 0)
+store['MayPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'May' in x else 0)
+store['JunPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Jun' in x else 0)
+store['JulPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Jul' in x else 0)
+store['AugPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Aug' in x else 0)
+store['SeptPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Sept' in x else 0)
+store['OctPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Oct' in x else 0)
+store['NovPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Nov' in x else 0)
+store['DecPromo'] = store['PromoInterval'].apply(lambda x: 1 if 'Dec' in x else 0)
 
 train = pd.merge(train, store, on='Store')
 train = train[train['Open'] != 0]

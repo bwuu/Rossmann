@@ -42,11 +42,11 @@ features = ['Store',
             'DecPromo']
 
 # feature engineering
-compDataAvailable = (test.CompetitionOpenSinceYear != 0) & (test.CompetitionOpenSinceMonth != 0)
-getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
-competitionOpenDeltaDays = test[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
-test['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
-test = test.fillna(-9999)
+# compDataAvailable = (test.CompetitionOpenSinceYear != 0) & (test.CompetitionOpenSinceMonth != 0)
+# getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
+# competitionOpenDeltaDays = test[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
+# test['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
+# test = test.fillna(-9999)
 
 data = test[features].values
 

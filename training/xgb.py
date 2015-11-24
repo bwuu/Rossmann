@@ -42,16 +42,11 @@ features = ['Store',
             'DecPromo']
 
 # feature engineering
-compDataAvailable = (data.CompetitionOpenSinceYear != 0) & (data.CompetitionOpenSinceMonth != 0)
-getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
-competitionOpenDeltaDays = data[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
-data['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
-data = data.fillna(-9999)
-
-targets = data['Sales'].values
-targets = np.reshape(targets, [targets.shape[0], 1])
-data = data[features].values
-data = np.concatenate((targets, data), axis=1)
+# compDataAvailable = (data.CompetitionOpenSinceYear != 0) & (data.CompetitionOpenSinceMonth != 0)
+# getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
+# competitionOpenDeltaDays = data[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
+# data['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
+#data = data.fillna(-9999)
 
 params = {"objective": "reg:linear",
           "booster" : "gbtree",
@@ -64,7 +59,11 @@ params = {"objective": "reg:linear",
           }
 num_boost_round = 1000
 print("Train an XGBoost model")
-X_train, X_valid = train_test_split(data, test_size=0.012, random_state=10)
+
+# sales in first column for easy syntax later
+holdout = (data.year==2014) & ((data.month==8))
+X_train = data[['Sales'] + features][~holdout].values
+X_valid = data[['Sales'] + features][holdout].values
 
 y_train = np.log1p(X_train[:, 0])
 y_valid = np.log1p(X_valid[:, 0])
@@ -73,7 +72,7 @@ dvalid = xgb.DMatrix(X_valid[:, 1:], y_valid)
 
 watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
 gbm = xgb.train(params, dtrain, num_boost_round, evals=watchlist, \
-  early_stopping_rounds=10, feval=rmspe_xg, verbose_eval=True)
+  early_stopping_rounds=120, feval=rmspe_xg, verbose_eval=True)
 
 gbm.save_model('../saved_models/xgb_001.model')
 print 'model saved in xgb_001.model'
@@ -82,26 +81,3 @@ print("Validating")
 yhat = gbm.predict(xgb.DMatrix(X_valid[:, 1:]))
 error = rmspe(X_valid[:,0], np.expm1(yhat))
 print('RMSPE: {:.6f}'.format(error))
-#
-
-# print("Make predictions on the test set")
-# dtest = xgb.DMatrix(test)
-# test_probs = gbm.predict(dtest)
-# Make Submission
-# result = pd.DataFrame({"Id": testIds, 'Sales': np.expm1(test_probs)})
-# result.to_csv("/home/osboxes/Desktop/xgboost_10_submission.csv", index=False)
-
-# XGB feature importances
-# Based on https://www.kaggle.com/mmueller/liberty-mutual-group-property-inspection-prediction/xgb-feature-importance-python/code
-
-# importance = gbm.get_fscore(fmap='xgb.fmap')
-# importance = sorted(importance.items(), key=operator.itemgetter(1))
-
-# df = pd.DataFrame(importance, columns=['feature', 'fscore'])
-# df['fscore'] = df['fscore'] / df['fscore'].sum()
-
-# featp = df.plot(kind='barh', x='feature', y='fscore', legend=False, figsize=(6, 10))
-# plt.title('XGBoost Feature Importance')
-# plt.xlabel('relative importance')
-# fig_featp = featp.get_figure()
-# fig_featp.savefig('/home/osboxes/Desktopfeature_importance_xgb.png', bbox_inches='tight', pad_inches=1)

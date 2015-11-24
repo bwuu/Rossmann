@@ -2,6 +2,7 @@ __author__ = 'osboxes'
 
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 def process(data):
     # map categoricals to numbers
@@ -11,10 +12,11 @@ def process(data):
     data.StateHoliday.replace(mappings, inplace=True)
 
     # date features
-    data['year'] = data.Date.dt.year
-    data['month'] = data.Date.dt.month
-    data['day'] = data.Date.dt.day
+    data['Year'] = data.Date.dt.year
+    data['Month'] = data.Date.dt.month
+    data['Day'] = data.Date.dt.day
     data['DayOfWeek'] = data.Date.dt.dayofweek
+    data['WeekOfYear'] = data.Date.dt.weekofyear
 
     # don't want to use customers from train data
     if 'Customers' in data:
@@ -23,9 +25,14 @@ def process(data):
     # stuff to be dropped regardless of train or test data
     data = data.drop(['PromoInterval', 'Open'], axis=1)
 
-    data = data.fillna(0)
-    print data
+    #feature engineering
+    data['CompetitionOpenDeltaMonths'] = 12 * (data.Year - data.CompetitionOpenSinceYear) + (data.Month - data.CompetitionOpenSinceMonth)
 
+    data['PromoOpenDeltaMonths'] = 12 * (data.Year - data.Promo2SinceYear) + (data.WeekOfYear - data.Promo2SinceWeek) / 4.0
+    data['PromoOpenDeltaMonths'] = data.PromoOpenDeltaMonths.apply(lambda x: x if x > 0 else 0)
+    #data.loc[data.Promo2SinceYear == 0, 'PromoOpen'] = 0
+
+    data = data.fillna(-999)
     return data
 
 np.set_printoptions(suppress=True)
@@ -63,6 +70,8 @@ train = train[train['Sales'] > 0]
 train = process(train)
 print('training data processed')
 
+# store 622
+test['Open'].apply(lambda x: 1 if np.isnan(x) else x)
 test = pd.merge(test, store, on='Store')
 test = process(test)
 print('testing data processed')

@@ -26,27 +26,23 @@ features = ['Store',
             'Promo2',
             'Promo2SinceWeek',
             'Promo2SinceYear',
-            'year',
-            'month',
-            'day',
-            'JanPromo',
-            'FebPromo',
-            'MarPromo',
-            'AprPromo',
-            'MayPromo',
-            'JunPromo',
-            'JulPromo',
-            'SeptPromo',
-            'OctPromo',
-            'NovPromo',
-            'DecPromo']
-
-# feature engineering
-# compDataAvailable = (data.CompetitionOpenSinceYear != 0) & (data.CompetitionOpenSinceMonth != 0)
-# getCompetitionDeltaDays = lambda x: (datetime(int(x.CompetitionOpenSinceYear), int(x.CompetitionOpenSinceMonth), 1) - x.Date).days
-# competitionOpenDeltaDays = data[compDataAvailable].apply(getCompetitionDeltaDays, axis=1)
-# data['CompetitionOpenDeltaDays'] = competitionOpenDeltaDays
-#data = data.fillna(-9999)
+            'Year',
+            'Month',
+            'Day',
+            #'JanPromo',
+            #'FebPromo',
+            #'MarPromo',
+            #'AprPromo',
+            #'MayPromo',
+            #'JunPromo',
+            #'JulPromo',
+            #'SeptPromo',
+            #'OctPromo',
+            #'NovPromo',
+            #'DecPromo',
+            'CompetitionOpenDeltaMonths',
+            'PromoOpenDeltaMonths'
+            ]
 
 params = {"objective": "reg:linear",
           "booster" : "gbtree",
@@ -57,13 +53,16 @@ params = {"objective": "reg:linear",
           #"silent": 1
           "seed": 1301
           }
-num_boost_round = 1000
+num_boost_round = 1700
 print("Train an XGBoost model")
 
 # sales in first column for easy syntax later
-holdout = (data.year==2014) & ((data.month==8))
+holdout = (data.Year==2014) & ((data.Month==8))
 X_train = data[['Sales'] + features][~holdout].values
 X_valid = data[['Sales'] + features][holdout].values
+
+#data = data[['Sales'] + features].values
+#X_train, X_valid = train_test_split(data, test_size=0.012, random_state=10)
 
 y_train = np.log1p(X_train[:, 0])
 y_valid = np.log1p(X_valid[:, 0])
